@@ -395,27 +395,49 @@ def _show_list(matches, patterns, last_n, fold):
     def green(text):
         return '\033[1;32m%s\033[0m' % text
 
+    def darkgreen(text):
+        return '\033[0;32m%s\033[0m' % text
+
     def red(text):
         return '\033[1;31m%s\033[0m' % text
 
-    def black(text):
+    def blue(text):
+        return '\033[1;34m%s\033[0m' % text
+
+    def gray(text):
         return '\033[1;30m%s\033[0m' % text
+
+    def black(text):
+        return '\033[0;30m%s\033[0m' % text
 
     os.system('clear')
     last_filename = ''
+    filename_color = None
+    need_print_filename = False
     for i, m in enumerate(matches):
+        if m.filename != last_filename:
+            need_print_filename = True
+            if filename_color == green:
+                filename_color = darkgreen
+            else:
+                filename_color = green
+        else:
+            need_print_filename = False
         if fold and m.filename == last_filename:
             continue
+
+        #if not need_print_filename:
+        #    filename_color = black
 
         last_filename = m.filename
         i += 1
         if i == last_n:
-            print(black('(%s) %s:%s:%s' % (i, m.line_num, m.filename, m.text)))
+            print(blue('(%3d) %s:%d:%s' % (i, m.filename, m.line_num, m.text)))
         else:
             code = m.text
             for pattern in patterns:
                 code = _highlight(pattern, code)
-            print('(%s) %s:%s:%s' % (red(i), yellow(m.line_num), green(m.filename), code))
+            print('(%s) %s:%s:%s' % (red('%3d' % i), filename_color(m.filename), yellow('%d' % m.line_num), code))
 
 def _filter_statement(all_, exclude):
     matches = [m for m in all_ if re.search(';\s*$', m.text)]
